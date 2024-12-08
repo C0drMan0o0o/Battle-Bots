@@ -14,9 +14,6 @@ const int off = 1500;  // Neutral (stop)
 const int fwd = 2000;  // Full forward
 const int rev = 1000;  // Full reverse
 
-int xPressCount = 0; // Counter to track number of "X" presses
-bool isControlEnabled = false; // Flag to enable/disable robot control
-
 void setup() {
   Serial.begin(9600);
   while (!Serial) {
@@ -61,8 +58,6 @@ void onConnectedController(ControllerPtr ctl) {
       Serial.print("CALLBACK: Controller connected, index=");
       Serial.println(i);
       myControllers[i] = ctl;
-      xPressCount = 0;  // Reset the X press counter on connection
-      isControlEnabled = false;  // Disable control initially
       return;
     }
   }
@@ -75,31 +70,14 @@ void onDisconnectedController(ControllerPtr ctl) {
       Serial.print("CALLBACK: Controller disconnected, index=");
       Serial.println(i);
       myControllers[i] = nullptr;
-      isControlEnabled = false;  // Disable control when the controller is disconnected
       return;
     }
   }
   Serial.println("CALLBACK: Disconnected controller not found in myControllers");
 }
 
-void checkXButtonPress(ControllerPtr gamepad) {
-  if (gamepad->a()) {
-    xPressCount++;
-    Serial.print("X button pressed ");
-    Serial.print(xPressCount);
-    Serial.println(" times.");
-    
-    // Enable control after the "X" button has been pressed 4 times
-    if (xPressCount == 4) {
-      isControlEnabled = true;
-      Serial.println("Control enabled! You can now control the robot.");
-    }
-  }
-}
-
 void processGamepad(ControllerPtr gamepad) {
-  if(isControlEnabled){
-    // Read joystick axes for motor control
+  // Read joystick axes for motor control
   int axisY1 = gamepad->axisY();  // Control Motor 1
   int axisY2 = gamepad->axisRY(); // Control Motor 2
 
@@ -122,10 +100,6 @@ void processGamepad(ControllerPtr gamepad) {
   // Send PWM signals
   sendPWMSignal(channel1, pulseWidth1);
   sendPWMSignal(channel2, pulseWidth2);
-  }
-  else{
-    checkXButtonPress(gamepad);
-  }
 }
 
 void loop() {
