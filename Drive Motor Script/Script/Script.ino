@@ -37,7 +37,6 @@ void setup() {
 
   // Initialize Bluepad32
   BP32.setup(&onConnectedController, &onDisconnectedController);
-  // BP32.forgetBluetoothKeys();
 
   // Setup PWM for Motor 1
   ledcSetup(channel1, 50, 16);   // 50 Hz frequency, 16-bit resolution
