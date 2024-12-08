@@ -53,7 +53,7 @@ void setup() {
 }
 
 void onConnectedController(ControllerPtr ctl) {
-  for (int i = 0; i < BP32_MAX_CONTROLLERS; i++) {
+  for (int i = 0; i < 1; i++) {
     if (myControllers[i] == nullptr) {
       Serial.print("CALLBACK: Controller connected, index=");
       Serial.println(i);
@@ -65,7 +65,7 @@ void onConnectedController(ControllerPtr ctl) {
 }
 
 void onDisconnectedController(ControllerPtr ctl) {
-  for (int i = 0; i < BP32_MAX_CONTROLLERS; i++) {
+  for (int i = 0; i < 1; i++) {
     if (myControllers[i] == ctl) {
       Serial.print("CALLBACK: Controller disconnected, index=");
       Serial.println(i);
