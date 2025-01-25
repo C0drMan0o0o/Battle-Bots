@@ -2,7 +2,7 @@
 
 #include <Bluepad32.h>
 
-ControllerPtr myControllers[BP32_MAX_CONTROLLERS];
+ControllerPtr myController = nullptr;
 
 const int pwmPin1 = 27; // Signal output pin for Motor 1
 const int pwmPin2 = 26; // Signal output pin for Motor 2
@@ -52,28 +52,10 @@ void setup() {
 }
 
 void onConnectedController(ControllerPtr ctl) {
-  for (int i = 0; i < 1; i++) {
-    if (myControllers[i] == nullptr) {
-      Serial.print("CALLBACK: Controller connected, index=");
-      Serial.println(i);
-      myControllers[i] = ctl;
-      return;
-    }
-  }
-  Serial.println("CALLBACK: No empty slot for new controller");
+  myController = ctl;
 }
 
-void onDisconnectedController(ControllerPtr ctl) {
-  for (int i = 0; i < 1; i++) {
-    if (myControllers[i] == ctl) {
-      Serial.print("CALLBACK: Controller disconnected, index=");
-      Serial.println(i);
-      myControllers[i] = nullptr;
-      return;
-    }
-  }
-  Serial.println("CALLBACK: Disconnected controller not found in myControllers");
-}
+void onDisconnectedController(ControllerPtr ctl) {}
 
 void processGamepad(ControllerPtr gamepad) {
   // Read joystick axes for motor control
@@ -104,12 +86,8 @@ void processGamepad(ControllerPtr gamepad) {
 void loop() {
   BP32.update(); // Update controller states
 
-  for (int i = 0; i < BP32_MAX_CONTROLLERS; i++) {
-    ControllerPtr myController = myControllers[i];
-
-    if (myController && myController->isConnected()) {
-      processGamepad(myController);
-    }
+  if (myController && myController->isConnected()) {
+    processGamepad(myController);
   }
 }
 
