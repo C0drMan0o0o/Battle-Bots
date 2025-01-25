@@ -108,28 +108,28 @@ void checkXButtonPress(ControllerPtr gamepad) {
 void processGamepad(ControllerPtr gamepad) {
   if(isControlEnabled){
     // Read joystick axes for motor control
-  int axisY1 = gamepad->axisY();  // Control Motor 1
-  int axisY2 = gamepad->axisRY(); // Control Motor 2
+    int axisY1 = gamepad->axisY();  // Control Motor 1
+    int axisY2 = gamepad->axisRY(); // Control Motor 2
 
-  // Calculate pulse width for Motor 1
-  int pulseWidth1 = off; // Default to neutral
-  if (axisY1 < 0) {
-    pulseWidth1 = 1500 + abs(axisY1); // Forward
-  } else if (axisY1 > 0) {
-    pulseWidth1 = 1500 - axisY1;     // Reverse
-  }
+    // Calculate pulse width for Motor 1
+    int pulseWidth1 = off; // Default to neutral
+    if (axisY1 < 0) {
+      pulseWidth1 = 1500 + abs(axisY1); // Forward
+    } else if (axisY1 > 0) {
+      pulseWidth1 = 1500 - axisY1;     // Reverse
+    }
 
-  // Calculate pulse width for Motor 2
-  int pulseWidth2 = off; // Default to neutral
-  if (axisY2 < 0) {
-    pulseWidth2 = 1500 + abs(axisY2); // Forward
-  } else if (axisY2 > 0) {
-    pulseWidth2 = 1500 - axisY2;     // Reverse
-  }
+    // Calculate pulse width for Motor 2
+    int pulseWidth2 = off; // Default to neutral
+    if (axisY2 < 0) {
+      pulseWidth2 = 1500 + abs(axisY2); // Forward
+    } else if (axisY2 > 0) {
+      pulseWidth2 = 1500 - axisY2;     // Reverse
+    }
 
-  // Send PWM signals
-  sendPWMSignal(channel1, pulseWidth1);
-  sendPWMSignal(channel2, pulseWidth2);
+    // Send PWM signals
+    sendPWMSignal(channel1, pulseWidth1);
+    sendPWMSignal(channel2, pulseWidth2);
   }
   else{
     checkXButtonPress(gamepad);
