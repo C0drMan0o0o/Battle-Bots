@@ -1,4 +1,4 @@
-// Code for forwards and backwards drive on 2 motors 
+// Code for forwards and backwards drive on 2 motors with password locking
 
 #include <Bluepad32.h>
 
@@ -82,18 +82,27 @@ void onDisconnectedController(ControllerPtr ctl) {
 }
 
 void checkXButtonPress(ControllerPtr gamepad) {
-  if (gamepad->a()) {
+  static bool wasAPressed = false; // Tracks the previous state of the button
+
+  // Check the current state of the button
+  bool isAPressed = gamepad->a();
+
+  // Detect the transition from "not pressed" to "pressed"
+  if (isAPressed && !wasAPressed) {
     xPressCount++;
     Serial.print("X button pressed ");
     Serial.print(xPressCount);
     Serial.println(" times.");
-    
+
     // Enable control after the "X" button has been pressed 4 times
     if (xPressCount == 4) {
       isControlEnabled = true;
       Serial.println("Control enabled! You can now control the robot.");
     }
   }
+
+  // Update the previous state to the current state
+  wasAPressed = isAPressed;
 }
 
 void processGamepad(ControllerPtr gamepad) {
