@@ -73,6 +73,8 @@ void onDisconnectedController(ControllerPtr ctl) {
     if (myControllers[i] == ctl) {
       Serial.print("CALLBACK: Controller disconnected, index=");
       Serial.println(i);
+      sendPWMSignal(0, off);
+      sendPWMSignal(1, off);
       myControllers[i] = nullptr;
       isControlEnabled = false;  // Disable control when the controller is disconnected
       return;
