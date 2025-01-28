@@ -18,6 +18,10 @@ const int off = 1500;  // Neutral (stop)
 const int fwd = 2000;  // Full forward
 const int rev = 1000;  // Full reverse
 
+// Servo Min and Max
+const int servoMin = 10;
+const int servoMax = 100;
+
 int xPressCount = 0; // Counter to track number of "X" presses
 bool isControlEnabled = false; // Flag to enable/disable robot control
 
@@ -58,7 +62,7 @@ void setup() {
   // Send neutral signal initially
   sendPWMSignal(channel1, off);
   sendPWMSignal(channel2, off);
-  servo.write(90);
+  servo.write(servoMin);
 }
 
 void onConnectedController(ControllerPtr ctl) {
@@ -172,11 +176,11 @@ void processGamepad(ControllerPtr gamepad) {
 
     if(leftBumperPressed) {
       Serial.println("Left Bumper Pressed!");
-      servo.write(90);
+      servo.write(servoMin);
     }
     else if(rightBumperPressed) {
       Serial.println("Right Bumper Pressed!");
-      servo.write(180);
+      servo.write(servoMax);
     }
 
     // Send PWM signals
