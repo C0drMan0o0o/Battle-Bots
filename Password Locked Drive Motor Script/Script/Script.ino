@@ -1,11 +1,15 @@
 // Code for forwards and backwards drive on 2 motors with password locking
 
 #include <Bluepad32.h>
+#include <ESP32Servo.h>
 
 ControllerPtr myControllers[BP32_MAX_CONTROLLERS];
 
+Servo servo;
+
 const int pwmPin1 = 27; // Signal output pin for Motor 1
 const int pwmPin2 = 26; // Signal output pin for Motor 2
+const int servoPin = 4;
 const int channel1 = 0; // LEDC channel for PWM of Motor 1
 const int channel2 = 1; // LEDC channel for PWM of Motor 2
 
@@ -19,9 +23,6 @@ bool isControlEnabled = false; // Flag to enable/disable robot control
 
 void setup() {
   Serial.begin(9600);
-  while (!Serial) {
-    ;  // Wait for serial port connection
-  }
 
   // Print firmware and MAC address info
   Serial.println("Initializing Bluepad32...");
@@ -49,9 +50,15 @@ void setup() {
   ledcSetup(channel2, 50, 16);   // 50 Hz frequency, 16-bit resolution
   ledcAttachPin(pwmPin2, channel2); // Attach PWM channel to pin
 
+  // Servo Setup
+  ESP32PWM::allocateTimer(2);
+  servo.setPeriodHertz(200);
+  servo.attach(servoPin, 500, 2400);
+
   // Send neutral signal initially
   sendPWMSignal(channel1, off);
   sendPWMSignal(channel2, off);
+  servo.write(90);
 }
 
 void onConnectedController(ControllerPtr ctl) {
@@ -107,6 +114,36 @@ void checkXButtonPress(ControllerPtr gamepad) {
   wasAPressed = isAPressed;
 }
 
+bool checkLeftBumperPress(ControllerPtr gamepad) {
+  static bool wasLeftBumperPressed = false;
+
+  bool isPressed = gamepad->l1();
+
+  if (isPressed && !wasLeftBumperPressed) {
+    wasLeftBumperPressed = true; // Update the state
+    return true;
+  } else if (!isPressed) {
+    wasLeftBumperPressed = false; // Reset the state when button is released
+  }
+
+  return false;
+}
+
+bool checkRightBumperPress(ControllerPtr gamepad) {
+  static bool wasRightBumperPressed = false;
+
+  bool isPressed = gamepad->r1();
+
+  if (isPressed && !wasRightBumperPressed) {
+    wasRightBumperPressed = true; // Update the state
+    return true;
+  } else if (!isPressed) {
+    wasRightBumperPressed = false; // Reset the state when button is released
+  }
+
+  return false;
+}
+
 void processGamepad(ControllerPtr gamepad) {
   if(isControlEnabled){
     // Read joystick axes for motor control
@@ -127,6 +164,19 @@ void processGamepad(ControllerPtr gamepad) {
       pulseWidth2 = 1500 + abs(axisY2); // Forward
     } else if (axisY2 > 0) {
       pulseWidth2 = 1500 - axisY2;     // Reverse
+    }
+
+    // Weapon Testing Code 
+    bool leftBumperPressed = checkLeftBumperPress(gamepad);
+    bool rightBumperPressed = checkRightBumperPress(gamepad);
+
+    if(leftBumperPressed) {
+      Serial.println("Left Bumper Pressed!");
+      servo.write(90);
+    }
+    else if(rightBumperPressed) {
+      Serial.println("Right Bumper Pressed!");
+      servo.write(180);
     }
 
     // Send PWM signals
