@@ -102,30 +102,6 @@ void onDisconnectedController(ControllerPtr ctl) {
   Serial.println("CALLBACK: Disconnected controller not found in myControllers");
 }
 
-void checkXButtonPress(ControllerPtr gamepad) {
-  static bool wasAPressed = false; // Tracks the previous state of the button
-
-  // Check the current state of the button
-  bool isAPressed = gamepad->a();
-
-  // Detect the transition from "not pressed" to "pressed"
-  if (isAPressed && !wasAPressed) {
-    xPressCount++;
-    Serial.print("X button pressed ");
-    Serial.print(xPressCount);
-    Serial.println(" times.");
-
-    // Enable control after the "X" button has been pressed 4 times
-    if (xPressCount == 4) {
-      isControlEnabled = true;
-      Serial.println("Control enabled! You can now control the robot.");
-    }
-  }
-
-  // Update the previous state to the current state
-  wasAPressed = isAPressed;
-}
-
 void passwordCheck(ControllerPtr gamepad) {
   static Button inputSequence[sizeof(password) / sizeof(password[0])]; // Store entered password
   static int inputIndex = 0; // Tracks the current position in the password sequence
