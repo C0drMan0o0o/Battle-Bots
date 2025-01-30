@@ -7,6 +7,13 @@ ControllerPtr myControllers[BP32_MAX_CONTROLLERS];
 
 Servo servo;
 
+enum Button {
+  cross,
+  triangle,
+  square,
+  circle
+};
+
 const int pwmPin1 = 27; // Signal output pin for Motor 1
 const int pwmPin2 = 26; // Signal output pin for Motor 2
 const int servoPin = 4;
@@ -24,6 +31,7 @@ const int servoMax = 100;
 
 int xPressCount = 0; // Counter to track number of "X" presses
 bool isControlEnabled = false; // Flag to enable/disable robot control
+const Button password[] = {cross, square, triangle, circle}; // This is the password array, set it to whatever password you want 
 
 void setup() {
   Serial.begin(9600);
@@ -118,6 +126,44 @@ void checkXButtonPress(ControllerPtr gamepad) {
   wasAPressed = isAPressed;
 }
 
+void passwordCheck(ControllerPtr gamepad) {
+  static Button inputSequence[sizeof(password) / sizeof(password[0])]; // Store entered password
+  static int inputIndex = 0; // Tracks the current position in the password sequence
+
+  // Check if any button from the password sequence is pressed
+  if (checkCrossPress(gamepad)) {
+    inputSequence[inputIndex] = cross;
+  } 
+  else if (checkSquarePress(gamepad)) {
+    inputSequence[inputIndex] = square;
+  } 
+  else if (checkCirclePress(gamepad)) {
+    inputSequence[inputIndex] = circle;
+  } 
+  else if (checkTrianglePress(gamepad)) {
+    inputSequence[inputIndex] = triangle;
+  } 
+  else {
+    return; // No relevant button pressed
+  }
+
+  // Verify the entered button against the password sequence
+  if (inputSequence[inputIndex] == password[inputIndex]) {
+    inputIndex++; // Move to the next expected button
+
+    if (inputIndex == sizeof(password) / sizeof(password[0])) {
+      isControlEnabled = true; // Unlock control if full password is entered
+      Serial.println("Password correct! Control enabled.");
+      inputIndex = 0; // Reset for future use
+    }
+  } 
+  else {
+    Serial.println("Incorrect input! Resetting password attempt.");
+    inputIndex = 0; // Reset if wrong button is pressed
+  }
+}
+
+
 bool checkLeftBumperPress(ControllerPtr gamepad) {
   static bool wasLeftBumperPressed = false;
 
@@ -148,6 +194,66 @@ bool checkRightBumperPress(ControllerPtr gamepad) {
   return false;
 }
 
+bool checkCrossPress(ControllerPtr gamepad) {
+  static bool wasCrossPressed = false;
+
+  bool isPressed = gamepad->a();
+
+  if (isPressed && !wasCrossPressed) {
+    wasCrossPressed = true; // Update the state
+    return true;
+  } else if (!isPressed) {
+    wasCrossPressed = false; // Reset the state when button is released
+  }
+
+  return false;
+}
+
+bool checkSquarePress(ControllerPtr gamepad) {
+  static bool wasSquarePressed = false;
+
+  bool isPressed = gamepad->x();
+
+  if (isPressed && !wasSquarePressed) {
+    wasSquarePressed = true; // Update the state
+    return true;
+  } else if (!isPressed) {
+    wasSquarePressed = false; // Reset the state when button is released
+  }
+
+  return false;
+}
+
+bool checkCirclePress(ControllerPtr gamepad) {
+  static bool wasCirclePressed = false;
+
+  bool isPressed = gamepad->b();
+
+  if (isPressed && !wasCirclePressed) {
+    wasCirclePressed = true; // Update the state
+    return true;
+  } else if (!isPressed) {
+    wasCirclePressed = false; // Reset the state when button is released
+  }
+
+  return false;
+}
+
+bool checkTrianglePress(ControllerPtr gamepad) {
+  static bool wasTrianglePressed = false;
+
+  bool isPressed = gamepad->y();
+
+  if (isPressed && !wasTrianglePressed) {
+    wasTrianglePressed = true; // Update the state
+    return true;
+  } else if (!isPressed) {
+    wasTrianglePressed = false; // Reset the state when button is released
+  }
+
+  return false;
+}
+
 void processGamepad(ControllerPtr gamepad) {
   if(isControlEnabled){
     // Read joystick axes for motor control
@@ -164,13 +270,13 @@ void processGamepad(ControllerPtr gamepad) {
 
     // Calculate pulse width for Motor 2
     int pulseWidth2 = off; // Default to neutral
-    if (axisY2 < 0) {
+    if (axisY2 > 0) {
       pulseWidth2 = 1500 + abs(axisY2); // Forward
-    } else if (axisY2 > 0) {
+    } else if (axisY2 < 0) {
       pulseWidth2 = 1500 - axisY2;     // Reverse
     }
 
-    // Weapon Testing Code 
+     
     bool leftBumperPressed = checkLeftBumperPress(gamepad);
     bool rightBumperPressed = checkRightBumperPress(gamepad);
 
@@ -188,7 +294,7 @@ void processGamepad(ControllerPtr gamepad) {
     sendPWMSignal(channel2, pulseWidth2);
   }
   else{
-    checkXButtonPress(gamepad);
+    passwordCheck(gamepad);
   }
 }
 
