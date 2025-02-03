@@ -7,6 +7,7 @@ ControllerPtr myControllers[BP32_MAX_CONTROLLERS];
 
 Servo servo;
 
+// Enum with individual button states
 enum Button {
   cross,
   triangle,
@@ -16,7 +17,7 @@ enum Button {
 
 const int pwmPin1 = 27; // Signal output pin for Motor 1
 const int pwmPin2 = 26; // Signal output pin for Motor 2
-const int servoPin = 4;
+const int servoPin = 4; // Signal output pin for Servo
 const int channel1 = 0; // LEDC channel for PWM of Motor 1
 const int channel2 = 1; // LEDC channel for PWM of Motor 2
 
@@ -26,8 +27,9 @@ const int fwd = 2000;  // Full forward
 const int rev = 1000;  // Full reverse
 
 // Servo Min and Max
-const int servoMin = 85;
-const int servoMax = 130;
+const int servoMin = 90;
+const int servoMax = 125;
+const int servoFlip = 145;
 
 int xPressCount = 0; // Counter to track number of "X" presses
 bool isControlEnabled = false; // Flag to enable/disable robot control
@@ -230,6 +232,24 @@ bool checkTrianglePress(ControllerPtr gamepad) {
   return false;
 }
 
+bool checkUpPress(ControllerPtr gamepad) {
+  static bool wasUpPressed = false;
+
+  bool isPressed = gamepad->dpad() == DPAD_UP;
+
+  if (isPressed && !wasUpPressed) {
+    wasUpPressed = true; // Update the state
+    return true;
+  } else if (!isPressed) {
+    wasUpPressed = false; // Reset the state when button is released
+  }
+
+  return false;
+}
+
+unsigned long lastServoFlipTime = 0; // Track the time when the servo was flipped
+bool servoFlipped = false; // Flag to check if the servo has been flipped
+
 void processGamepad(ControllerPtr gamepad) {
   if(isControlEnabled){
     // Read joystick axes for motor control
@@ -252,17 +272,31 @@ void processGamepad(ControllerPtr gamepad) {
       pulseWidth2 = 1500 - axisY2;     // Reverse
     }
 
-     
     bool leftBumperPressed = checkLeftBumperPress(gamepad);
     bool rightBumperPressed = checkRightBumperPress(gamepad);
+    bool upPressed = checkUpPress(gamepad);
 
     if(leftBumperPressed) {
       Serial.println("Left Bumper Pressed!");
       servo.write(servoMin);
+      servoFlipped = false;  // Ensure servo flip flag is reset
     }
     else if(rightBumperPressed) {
       Serial.println("Right Bumper Pressed!");
       servo.write(servoMax);
+      servoFlipped = false;  // Ensure servo flip flag is reset
+    }
+    else if(upPressed && !servoFlipped) {
+      Serial.println("Up Pressed on DPAD!");
+      servo.write(servoFlip);
+      lastServoFlipTime = millis();  // Record the time when the servo was flipped
+      servoFlipped = true;           // Set flag to indicate the servo has been flipped
+    }
+
+    // Check if 500 milliseconds have passed since the servo was flipped
+    if (servoFlipped && millis() - lastServoFlipTime >= 500) {
+      servo.write(servoMin);  // Reset the servo to its original position
+      servoFlipped = false;   // Reset the flag
     }
 
     // Send PWM signals
