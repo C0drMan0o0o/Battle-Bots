@@ -266,9 +266,9 @@ void processGamepad(ControllerPtr gamepad) {
 
     // Calculate pulse width for Motor 2
     int pulseWidth2 = off; // Default to neutral
-    if (axisY2 > 0) {
+    if (axisY2 < 0) {
       pulseWidth2 = 1500 + abs(axisY2); // Forward
-    } else if (axisY2 < 0) {
+    } else if (axisY2 > 0) {
       pulseWidth2 = 1500 - axisY2;     // Reverse
     }
 
