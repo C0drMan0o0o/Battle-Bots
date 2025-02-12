@@ -72,7 +72,7 @@ void setup() {
   // Send neutral signal initially
   sendPWMSignal(channel1, off);
   sendPWMSignal(channel2, off);
-  servo.write(servoMin);
+  servo.write(servoMax);
 }
 
 void onConnectedController(ControllerPtr ctl) {
