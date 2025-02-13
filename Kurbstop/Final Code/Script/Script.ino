@@ -57,11 +57,11 @@ void setup() {
   BP32.setup(&onConnectedController, &onDisconnectedController);
 
   // Setup PWM for Motor 1
-  ledcSetup(channel1, 50, 16);   // 50 Hz frequency, 16-bit resolution
+  ledcSetup(channel1, 200, 16);   // 50 Hz frequency, 16-bit resolution
   ledcAttachPin(pwmPin1, channel1); // Attach PWM channel to pin
 
   // Setup PWM for Motor 2
-  ledcSetup(channel2, 50, 16);   // 50 Hz frequency, 16-bit resolution
+  ledcSetup(channel2, 200, 16);   // 50 Hz frequency, 16-bit resolution
   ledcAttachPin(pwmPin2, channel2); // Attach PWM channel to pin
 
   // Servo Setup
@@ -326,7 +326,7 @@ void sendPWMSignal(int channel, int pulseWidth) {
 
   // Only send the signal if the pulse width has changed
   if (pulseWidth != lastPulseWidth[channel]) {
-    int dutyCycle = map(pulseWidth, 1000, 2000, 3277, 6554);
+    int dutyCycle = (pulseWidth * 65536L) / 5000L;
     ledcWrite(channel, dutyCycle);
 
     // Debug output
