@@ -57,11 +57,11 @@ void setup() {
   BP32.setup(&onConnectedController, &onDisconnectedController);
 
   // Setup PWM for Motor 1
-  ledcSetup(channel1, 200, 16);   // 50 Hz frequency, 16-bit resolution
+  ledcSetup(channel1, 200, 16);   // 200 Hz frequency, 16-bit resolution
   ledcAttachPin(pwmPin1, channel1); // Attach PWM channel to pin
 
   // Setup PWM for Motor 2
-  ledcSetup(channel2, 200, 16);   // 50 Hz frequency, 16-bit resolution
+  ledcSetup(channel2, 200, 16);   // 200 Hz frequency, 16-bit resolution
   ledcAttachPin(pwmPin2, channel2); // Attach PWM channel to pin
 
   // Servo Setup
