@@ -27,9 +27,9 @@ const int fwd = 2000;  // Full forward
 const int rev = 1000;  // Full reverse
 
 // Servo Min and Max
-const int servoMin = 90;
-const int servoMax = 125;
-const int servoFlip = 145;
+const int servoMin = 0;
+const int servoMax = 50;
+const int servoFlip = 60;
 
 int xPressCount = 0; // Counter to track number of "X" presses
 bool isControlEnabled = false; // Flag to enable/disable robot control
