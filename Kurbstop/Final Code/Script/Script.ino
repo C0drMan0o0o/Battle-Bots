@@ -31,7 +31,6 @@ const int servoMin = 0;
 const int servoMax = 50;
 const int servoFlip = 60;
 
-int xPressCount = 0; // Counter to track number of "X" presses
 bool isControlEnabled = false; // Flag to enable/disable robot control
 const Button password[] = {cross, square, triangle, circle}; // This is the password array, set it to whatever password you want 
 
@@ -81,7 +80,6 @@ void onConnectedController(ControllerPtr ctl) {
       Serial.print("CALLBACK: Controller connected, index=");
       Serial.println(i);
       myControllers[i] = ctl;
-      xPressCount = 0;  // Reset the X press counter on connection
       isControlEnabled = false;  // Disable control initially
       return;
     }
