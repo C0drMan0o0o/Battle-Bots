@@ -15,6 +15,11 @@ enum Button {
   circle
 };
 
+enum GearState {
+  High,
+  Low
+};
+
 const int leftMotorPWMPin = 27; // Signal output pin for Left Motor
 const int rightMotorPWMPin = 26; // Signal output pin for Right Motor
 const int servoPin = 4; // Signal output pin for Servo
@@ -33,6 +38,9 @@ const int servoFlip = 60;
 
 bool isControlEnabled = false; // Flag to enable/disable robot control
 const Button password[] = {cross, square, triangle, circle}; // This is the password array, set it to whatever password you want 
+
+// Gear State
+GearState gear;
 
 void setup() {
   Serial.begin(9600);
@@ -72,6 +80,7 @@ void setup() {
   sendPWMSignal(channel1, off);
   sendPWMSignal(channel2, off);
   servo.write(servoMax);
+  gear = High;
 }
 
 void onConnectedController(ControllerPtr ctl) {
@@ -245,28 +254,85 @@ bool checkUpPress(ControllerPtr gamepad) {
   return false;
 }
 
+bool checkLeftPress(ControllerPtr gamepad) {
+  static bool wasLeftPressed = false;
+
+  bool isPressed = gamepad->dpad() == DPAD_LEFT;
+
+  if (isPressed && !wasLeftPressed) {
+    wasLeftPressed = true; // Update the state
+    return true;
+  } else if (!isPressed) {
+    wasLeftPressed = false; // Reset the state when button is released
+  }
+
+  return false;
+}
+
+bool checkRightPress(ControllerPtr gamepad) {
+  static bool wasRightPressed = false;
+
+  bool isPressed = gamepad->dpad() == DPAD_RIGHT;
+
+  if (isPressed && !wasRightPressed) {
+    wasRightPressed = true; // Update the state
+    return true;
+  } else if (!isPressed) {
+    wasRightPressed = false; // Reset the state when button is released
+  }
+
+  return false;
+}
+
 unsigned long lastServoFlipTime = 0; // Track the time when the servo was flipped
 bool servoFlipped = false; // Flag to check if the servo has been flipped
 
 void processGamepad(ControllerPtr gamepad) {
-  if(isControlEnabled){
+  if(isControlEnabled) {
     // Read joystick axes for motor control
     int leftAxis = gamepad->axisY();  // Control Left Motor
     int rightAxis = gamepad->axisRY(); // Control Right Motor
+    int leftPulseWidth;
+    int rightPulseWidth;
 
-    // Calculate pulse width for Left Motor
-    int leftPulseWidth = off; // Default to neutral
-    if (leftAxis < 0) {
-      leftPulseWidth = 1500 + abs(leftAxis); // Forward
-    } else if (leftAxis > 0) {
-      leftPulseWidth = 1500 - leftAxis; // Reverse
+    if(checkLeftPress(gamepad)) {
+      gear = Low;
+    }
+    else if(checkRightPress(gamepad)) {
+      gear = High;
     }
 
-    int rightPulseWidth = off; // Default to neutral
-    if (rightAxis < 0) {
-      rightPulseWidth = 1500 + abs(rightAxis); // Forward
-    } else if (rightAxis > 0) {
-      rightPulseWidth = 1500 - rightAxis;     // Reverse
+    if(gear == High) {
+      // Calculate pulse width for Left Motor
+      leftPulseWidth = off; // Default to neutral
+      if (leftAxis < 0) {
+        leftPulseWidth = 1500 + abs(leftAxis); // Forward
+      } else if (leftAxis > 0) {
+        leftPulseWidth = 1500 - leftAxis; // Reverse
+      }
+
+      rightPulseWidth = off; // Default to neutral
+      if (rightAxis < 0) {
+        rightPulseWidth = 1500 + abs(rightAxis); // Forward
+      } else if (rightAxis > 0) {
+        rightPulseWidth = 1500 - rightAxis;     // Reverse
+      }
+    }
+    else {
+      // Calculate pulse width for Left Motor
+      leftPulseWidth = off; // Default to neutral
+      if (leftAxis < 0) {
+        leftPulseWidth = 1500 + abs(leftAxis * 0.5); // Forward
+      } else if (leftAxis > 0) {
+        leftPulseWidth = 1500 - (leftAxis * 0.5); // Reverse
+      }
+
+      rightPulseWidth = off; // Default to neutral
+      if (rightAxis < 0) {
+        rightPulseWidth = 1500 + abs(rightAxis * 0.5); // Forward
+      } else if (rightAxis > 0) {
+        rightPulseWidth = 1500 - (rightAxis * 0.5);     // Reverse
+      }
     }
 
     bool leftBumperPressed = checkLeftBumperPress(gamepad);
