@@ -55,11 +55,11 @@ void setup() {
   // Initialize Bluepad32
   BP32.setup(&onConnectedController, &onDisconnectedController);
 
-  // Setup PWM for Motor 1
+  // Setup PWM for Left Motor
   ledcSetup(channel1, 200, 16);   // 200 Hz frequency, 16-bit resolution
   ledcAttachPin(leftMotorPWMPin, channel1); // Attach PWM channel to pin
 
-  // Setup PWM for Motor 2
+  // Setup PWM for Right Motor
   ledcSetup(channel2, 200, 16);   // 200 Hz frequency, 16-bit resolution
   ledcAttachPin(rightMotorPWMPin, channel2); // Attach PWM channel to pin
 
@@ -254,20 +254,20 @@ void processGamepad(ControllerPtr gamepad) {
     int leftAxis = gamepad->axisY();  // Control Left Motor
     int rightAxis = gamepad->axisRY(); // Control Right Motor
 
-    // Calculate pulse width for Motor 1
+    // Calculate pulse width for Left Motor
     int leftPulseWidth = off; // Default to neutral
     if (leftAxis < 0) {
       leftPulseWidth = 1500 + abs(leftAxis); // Forward
     } else if (leftAxis > 0) {
-      leftPulseWidth = 1500 - leftAxis;     // Reverse
+      leftPulseWidth = 1500 - leftAxis; // Reverse
     }
 
-    // Calculate pulse width for Motor 2
+    // Calculate pulse width for Right Motor
     int rightPulseWidth = off; // Default to neutral
-    if (rightAxis < 0) {
-      rightPulseWidth = 1500 + abs(rightAxis); // Forward
-    } else if (rightAxis > 0) {
-      rightPulseWidth = 1500 - rightAxis;     // Reverse
+    if (rightAxis > 0) {
+      rightPulseWidth = 1500 + rightAxis; // Forward
+    } else if (rightAxis < 0) {
+      rightPulseWidth = 1500 - abs(rightAxis); // Reverse
     }
 
     bool leftBumperPressed = checkLeftBumperPress(gamepad);
