@@ -15,11 +15,11 @@ enum Button {
   circle
 };
 
-const int pwmPin1 = 27; // Signal output pin for Motor 1
-const int pwmPin2 = 26; // Signal output pin for Motor 2
+const int leftMotorPWMPin = 27; // Signal output pin for Left Motor
+const int rightMotorPWMPin = 26; // Signal output pin for Right Motor
 const int servoPin = 4; // Signal output pin for Servo
-const int channel1 = 0; // LEDC channel for PWM of Motor 1
-const int channel2 = 1; // LEDC channel for PWM of Motor 2
+const int channel1 = 0; // LEDC channel for PWM of Left Motor
+const int channel2 = 1; // LEDC channel for PWM of Right Motor
 
 // Pulse width values in microseconds for ESC control
 const int off = 1500;  // Neutral (stop)
@@ -57,11 +57,11 @@ void setup() {
 
   // Setup PWM for Motor 1
   ledcSetup(channel1, 200, 16);   // 200 Hz frequency, 16-bit resolution
-  ledcAttachPin(pwmPin1, channel1); // Attach PWM channel to pin
+  ledcAttachPin(leftMotorPWMPin, channel1); // Attach PWM channel to pin
 
   // Setup PWM for Motor 2
   ledcSetup(channel2, 200, 16);   // 200 Hz frequency, 16-bit resolution
-  ledcAttachPin(pwmPin2, channel2); // Attach PWM channel to pin
+  ledcAttachPin(rightMotorPWMPin, channel2); // Attach PWM channel to pin
 
   // Servo Setup
   ESP32PWM::allocateTimer(2);
@@ -251,23 +251,23 @@ bool servoFlipped = false; // Flag to check if the servo has been flipped
 void processGamepad(ControllerPtr gamepad) {
   if(isControlEnabled){
     // Read joystick axes for motor control
-    int axisY1 = gamepad->axisY();  // Control Motor 1
-    int axisY2 = gamepad->axisRY(); // Control Motor 2
+    int leftAxis = gamepad->axisY();  // Control Left Motor
+    int rightAxis = gamepad->axisRY(); // Control Right Motor
 
     // Calculate pulse width for Motor 1
-    int pulseWidth1 = off; // Default to neutral
-    if (axisY1 < 0) {
-      pulseWidth1 = 1500 + abs(axisY1); // Forward
-    } else if (axisY1 > 0) {
-      pulseWidth1 = 1500 - axisY1;     // Reverse
+    int leftPulseWidth = off; // Default to neutral
+    if (leftAxis < 0) {
+      leftPulseWidth = 1500 + abs(leftAxis); // Forward
+    } else if (leftAxis > 0) {
+      leftPulseWidth = 1500 - leftAxis;     // Reverse
     }
 
     // Calculate pulse width for Motor 2
-    int pulseWidth2 = off; // Default to neutral
-    if (axisY2 < 0) {
-      pulseWidth2 = 1500 + abs(axisY2); // Forward
-    } else if (axisY2 > 0) {
-      pulseWidth2 = 1500 - axisY2;     // Reverse
+    int rightPulseWidth = off; // Default to neutral
+    if (rightAxis < 0) {
+      rightPulseWidth = 1500 + abs(rightAxis); // Forward
+    } else if (rightAxis > 0) {
+      rightPulseWidth = 1500 - rightAxis;     // Reverse
     }
 
     bool leftBumperPressed = checkLeftBumperPress(gamepad);
@@ -298,8 +298,8 @@ void processGamepad(ControllerPtr gamepad) {
     }
 
     // Send PWM signals
-    sendPWMSignal(channel1, pulseWidth1);
-    sendPWMSignal(channel2, pulseWidth2);
+    sendPWMSignal(channel1, leftPulseWidth);
+    sendPWMSignal(channel2, rightPulseWidth);
   }
   else{
     passwordCheck(gamepad);
