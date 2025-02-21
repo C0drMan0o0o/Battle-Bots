@@ -262,12 +262,11 @@ void processGamepad(ControllerPtr gamepad) {
       leftPulseWidth = 1500 - leftAxis; // Reverse
     }
 
-    // Calculate pulse width for Right Motor
     int rightPulseWidth = off; // Default to neutral
-    if (rightAxis > 0) {
-      rightPulseWidth = 1500 + rightAxis; // Forward
-    } else if (rightAxis < 0) {
-      rightPulseWidth = 1500 - abs(rightAxis); // Reverse
+    if (rightAxis < 0) {
+      rightPulseWidth = 1500 + abs(rightAxis); // Forward
+    } else if (rightAxis > 0) {
+      rightPulseWidth = 1500 - rightAxis;     // Reverse
     }
 
     bool leftBumperPressed = checkLeftBumperPress(gamepad);
