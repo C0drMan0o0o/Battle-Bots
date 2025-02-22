@@ -1,4 +1,4 @@
-// Code for forwards and backwards drive on 2 motors with password locking
+// Final Code for Kurbstop
 
 #include <Bluepad32.h>
 #include <ESP32Servo.h>
@@ -32,7 +32,7 @@ const int fwd = 2000;  // Full forward
 const int rev = 1000;  // Full reverse
 
 // Servo Min and Max
-const int servoMin = 0;
+const int servoMin = 2;
 const int servoMax = 50;
 const int servoFlip = 60;
 
