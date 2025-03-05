@@ -79,7 +79,7 @@ void setup() {
   // Send neutral signal initially
   sendPWMSignal(channel1, off);
   sendPWMSignal(channel2, off);
-  servo.write(servoMax);
+  servo.write(servoMin);
   gear = High;
 }
 
